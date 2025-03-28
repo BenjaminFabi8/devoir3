@@ -1,7 +1,6 @@
 package main
 
 import (
-	"devoir3/src/customAtomic"
 	"devoir3/src/game"
 	"fmt"
 	"math/rand"
@@ -39,14 +38,12 @@ func main() {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	for !objectiveReached {
-		//Clear console
-		//fmt.Print("\033[H\033[2J")
 
 		grid.PrintGrid()
 
 		newPos := GetRandomMove(agentRandomPos, rng)
 
-		if grid.Cells[newPos.Y][newPos.X] == customAtomic.NewSwappableRune(game.Objective) {
+		if grid.Cells[newPos.Y][newPos.X].Load() == game.Objective {
 			objectiveReached = true
 		}
 
@@ -61,7 +58,7 @@ func main() {
 			continue
 		}
 
-		if grid.Cells[newPos.Y][newPos.X] == customAtomic.NewSwappableRune(game.Objective) {
+		if grid.Cells[newPos.Y][newPos.X].Load() == game.Objective {
 			objectiveReached = true
 		}
 
