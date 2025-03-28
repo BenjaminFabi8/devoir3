@@ -2,34 +2,32 @@ package main
 
 import (
 	"fmt"
-    "math/rand"
-    "time"
+	"math/rand"
+	"time"
 )
 
-// Constants for grid symbols
 const (
-	Empty    = ' '
-	Obstacle = '#'
+	Empty     = ' '
+	Obstacle  = '#'
 	Objective = 'O'
-	Agent   = 'A'
+	Agent     = 'A'
 )
 
-// Grid represents the game grid
 type Grid struct {
-	Cells [][]rune
-	Rows  int
-	Cols  int
+	Cells      [][]rune
+	Rows       int
+	Cols       int
+	Objectives []Position
 }
 
-// Position represents a position in the grid
 type Position struct {
 	X, Y int
 }
 
+var directions = []Position{
+	{-1, 0}, {1, 0}, {0, -1}, {0, 1},
+}
 
-
-
-// InitializeGrid initializes the grid from a given ASCII representation
 func InitializeGrid(input []string) *Grid {
 	rows := len(input)
 	cols := len(input[0])
@@ -37,87 +35,194 @@ func InitializeGrid(input []string) *Grid {
 	for i := 0; i < rows; i++ {
 		cells[i] = []rune(input[i])
 	}
+
 	return &Grid{Cells: cells, Rows: rows, Cols: cols}
 }
 
-// PrintGrid displays the grid
+func (g *Grid) SetObjectives() {
+	for i := 0; i < g.Rows; i++ {
+		for j := 0; j < g.Cols; j++ {
+			if g.Cells[i][j] == Objective {
+				g.Objectives = append(g.Objectives, Position{j, i})
+			}
+		}
+	}
+}
+
 func (g *Grid) PrintGrid() {
 	for _, row := range g.Cells {
 		fmt.Println(string(row))
 	}
 }
 
-// IsValidMove checks if a move is valid
 func (g *Grid) IsValidMove(pos Position) bool {
-	if pos.X < 0 || pos.X >= g.Rows || pos.Y < 0 || pos.Y >= g.Cols {
+	if pos.Y < 0 || pos.Y >= g.Rows || pos.X < 0 || pos.X >= g.Cols {
 		return false
 	}
-	return g.Cells[pos.X][pos.Y] == Empty || g.Cells[pos.X][pos.Y] == Objective
+	return g.Cells[pos.Y][pos.X] == Empty || g.Cells[pos.Y][pos.X] == Objective
 }
 
-// MoveAgent moves an agent to a new position if valid
 func (g *Grid) MoveAgent(current, next Position) bool {
 	if g.IsValidMove(next) {
-		g.Cells[current.X][current.Y] = Empty
-		g.Cells[next.X][next.Y] = Agent
+		g.Cells[current.Y][current.X] = Empty
+		g.Cells[next.Y][next.X] = Agent
 		return true
 	}
 	return false
 }
 
 func GetRandomMove(pos Position, rng *rand.Rand) Position {
-    directions := []Position{
-        {X: -1, Y: 0}, // Up
-        {X: 1, Y: 0},  // Down
-        {X: 0, Y: -1}, // Left
-        {X: 0, Y: 1},  // Right
-    }
-    move := directions[rng.Intn(len(directions))]
-    return Position{X: pos.X + move.X, Y: pos.Y + move.Y}
+	move := directions[rng.Intn(len(directions))]
+	return Position{X: pos.X + move.X, Y: pos.Y + move.Y}
+}
+
+func GenerateAStarPoint(g *Grid, start Position) (Position, bool) {
+	//A faire dans le constructeur
+	bestObjective, found := g.GetClosestObjective(start)
+	if !found {
+		fmt.Println("Oups, pas d'objectif mon grand...")
+		return Position{}, false
+	}
+	//fmt.Printf("Objectif Found: %d, %d \n", bestObjective.X, bestObjective.Y)
+
+	queue := []Position{start}
+	visited := make(map[Position]bool)
+	parent := make(map[Position]Position)
+	visited[start] = true
+
+	for len(queue) > 0 {
+		nextQueue := []Position{}
+		for _, current := range queue {
+			if current == bestObjective {
+				step := bestObjective
+				for parent[step] != start {
+					step = parent[step]
+				}
+				return step, true
+			}
+
+			for _, direction := range directions {
+				newPos := Position{current.X + direction.X, current.Y + direction.Y}
+				if g.IsValidMove(newPos) && !visited[newPos] {
+					nextQueue = append(nextQueue, newPos)
+					visited[newPos] = true
+					parent[newPos] = current
+				}
+			}
+		}
+		queue = nextQueue
+	}
+
+	return Position{}, false
+}
+
+func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
+
+	if len(g.Objectives) == 1 {
+		return g.Objectives[0], true
+	}
+
+	closest := Position{}
+	minSteps := 10000
+
+	for _, obj := range g.Objectives {
+		steps := g.GetDistanceForObjectif(start, obj)
+		if steps != -1 && steps < minSteps {
+			minSteps = steps
+			closest = obj
+		}
+	}
+
+	if minSteps == -1 {
+		return Position{}, false
+	}
+
+	return closest, true
+}
+
+func (g *Grid) GetDistanceForObjectif(start, objective Position) int {
+	queue := []Position{start}
+	visited := make(map[Position]bool)
+	visited[start] = true
+	steps := 0
+
+	for len(queue) > 0 {
+		nextQueue := []Position{}
+		for _, current := range queue {
+			if current == objective {
+				return steps
+			}
+
+			for _, direction := range directions {
+				newPos := Position{current.X + direction.X, current.Y + direction.Y}
+				if g.IsValidMove(newPos) && !visited[newPos] {
+					nextQueue = append(nextQueue, newPos)
+					visited[newPos] = true
+				}
+			}
+
+		}
+		queue = nextQueue
+		steps++
+	}
+
+	return -1
 }
 
 func main() {
 
 	objectiveReached := false
-	// Example grid input
 	input := []string{
 		"##########",
-		"#A O   # #",
-		"# #      #",
+		"#A     # #",
+		"###      #",
 		"#   #    #",
-		"#        #",
-		"#        #",	
+		"#   A    #",
+		"#      O #",
 		"##########",
 	}
 
-    grid := InitializeGrid(input)
-    agentPos := Position{X: 1, Y: 1}
+	grid := InitializeGrid(input)
+	grid.SetObjectives()
+	agentRandomPos := Position{X: 4, Y: 4}
+	agentAStarPos := Position{X: 1, Y: 1}
 
-	 // Create a new random number generator
-	 rng := rand.New(rand.NewSource(time.Now().UnixNano()))
+	// Create a new random number generator
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-    for !objectiveReached {
-        // Clear the console
-        fmt.Print("\033[H\033[2J")
+	for !objectiveReached {
+		//Clear console
+		//fmt.Print("\033[H\033[2J")
 
-        // Print the grid
-        grid.PrintGrid()
+		grid.PrintGrid()
 
+		newPos := GetRandomMove(agentRandomPos, rng)
 
-		//RANDOM AGENT
-        // Generate a random move
-        newPos := GetRandomMove(agentPos, rng)
-		// Check if the agent will reached the objective
-		if grid.Cells[newPos.X][newPos.Y] == Objective {
+		if grid.Cells[newPos.Y][newPos.X] == Objective {
 			objectiveReached = true
 		}
-        // Move the agent if the move is valid
-        if grid.MoveAgent(agentPos, newPos)  {
-            agentPos = newPos
-        }
 
+		if grid.MoveAgent(agentRandomPos, newPos) {
+			agentRandomPos = newPos
+		}
 
-        time.Sleep(100 * time.Millisecond)
-    }
+		newPos, err := GenerateAStarPoint(grid, agentAStarPos)
+
+		if !err {
+			fmt.Print("GO sa gosse pis sa me force a l'utiliser -_- \n")
+			continue
+		}
+
+		if grid.Cells[newPos.Y][newPos.X] == Objective {
+			objectiveReached = true
+		}
+
+		if grid.MoveAgent(agentAStarPos, newPos) {
+			agentAStarPos = newPos
+		}
+
+		time.Sleep(100 * time.Millisecond)
+	}
 	fmt.Println("Objective reached!")
+	grid.PrintGrid()
 }
