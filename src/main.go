@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+    "math/rand"
+    "time"
 )
 
 // Constants for grid symbols
@@ -9,7 +11,7 @@ const (
 	Empty    = ' '
 	Obstacle = '#'
 	Objective = 'O'
-	Agent    = 'A'
+	Agent   = 'A'
 )
 
 // Grid represents the game grid
@@ -23,6 +25,9 @@ type Grid struct {
 type Position struct {
 	X, Y int
 }
+
+
+
 
 // InitializeGrid initializes the grid from a given ASCII representation
 func InitializeGrid(input []string) *Grid {
@@ -60,27 +65,59 @@ func (g *Grid) MoveAgent(current, next Position) bool {
 	return false
 }
 
+func GetRandomMove(pos Position, rng *rand.Rand) Position {
+    directions := []Position{
+        {X: -1, Y: 0}, // Up
+        {X: 1, Y: 0},  // Down
+        {X: 0, Y: -1}, // Left
+        {X: 0, Y: 1},  // Right
+    }
+    move := directions[rng.Intn(len(directions))]
+    return Position{X: pos.X + move.X, Y: pos.Y + move.Y}
+}
+
 func main() {
+
+	objectiveReached := false
 	// Example grid input
 	input := []string{
-		"#####",
-		"#A  #",
-		"# O #",
-		"#####",
+		"##########",
+		"#A O   # #",
+		"# #      #",
+		"#   #    #",
+		"#        #",
+		"#        #",	
+		"##########",
 	}
 
-	grid := InitializeGrid(input)
-	fmt.Println("Initial Grid:")
-	grid.PrintGrid()
+    grid := InitializeGrid(input)
+    agentPos := Position{X: 1, Y: 1}
 
-	// Example agent movement
-	agentPos := Position{X: 1, Y: 1}
-	newPos := Position{X: 2, Y: 1}
+	 // Create a new random number generator
+	 rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	if grid.MoveAgent(agentPos, newPos) {
-		fmt.Println("\nGrid after moving agent:")
-		grid.PrintGrid()
-	} else {
-		fmt.Println("\nInvalid move!")
-	}
+    for !objectiveReached {
+        // Clear the console
+        fmt.Print("\033[H\033[2J")
+
+        // Print the grid
+        grid.PrintGrid()
+
+
+		//RANDOM AGENT
+        // Generate a random move
+        newPos := GetRandomMove(agentPos, rng)
+		// Check if the agent will reached the objective
+		if grid.Cells[newPos.X][newPos.Y] == Objective {
+			objectiveReached = true
+		}
+        // Move the agent if the move is valid
+        if grid.MoveAgent(agentPos, newPos)  {
+            agentPos = newPos
+        }
+
+
+        time.Sleep(100 * time.Millisecond)
+    }
+	fmt.Println("Objective reached!")
 }
