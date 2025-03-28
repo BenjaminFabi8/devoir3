@@ -1,6 +1,7 @@
 package main
 
 import (
+	"devoir3/src/agents"
 	"fmt"
 	"math/rand"
 	"time"
@@ -10,7 +11,7 @@ const (
 	Empty     = ' '
 	Obstacle  = '#'
 	Objective = 'O'
-	Agent     = 'A'
+	AgentChar = 'A'
 )
 
 type Grid struct {
@@ -18,10 +19,6 @@ type Grid struct {
 	Rows       int
 	Cols       int
 	Objectives []Position
-}
-
-type Position struct {
-	X, Y int
 }
 
 var directions = []Position{
@@ -32,7 +29,7 @@ func InitializeGrid(input []string) *Grid {
 	rows := len(input)
 	cols := len(input[0])
 	cells := make([][]rune, rows)
-	for i := 0; i < rows; i++ {
+	for i := range rows {
 		cells[i] = []rune(input[i])
 	}
 
@@ -55,17 +52,19 @@ func (g *Grid) PrintGrid() {
 	}
 }
 
-func (g *Grid) IsValidMove(pos Position) bool {
-	if pos.Y < 0 || pos.Y >= g.Rows || pos.X < 0 || pos.X >= g.Cols {
+// IsValidMove checks if a move is valid
+func (g *Grid) IsValidMove(pos agents.Position) bool {
+	if pos.X < 0 || pos.X >= g.Rows || pos.Y < 0 || pos.Y >= g.Cols {
 		return false
 	}
 	return g.Cells[pos.Y][pos.X] == Empty || g.Cells[pos.Y][pos.X] == Objective
 }
 
-func (g *Grid) MoveAgent(current, next Position) bool {
+// MoveAgent moves an agent to a new position if valid
+func (g *Grid) MoveAgent(current, next agents.Position) bool {
 	if g.IsValidMove(next) {
 		g.Cells[current.Y][current.X] = Empty
-		g.Cells[next.Y][next.X] = Agent
+		g.Cells[next.Y][next.X] = AgentChar
 		return true
 	}
 	return false
