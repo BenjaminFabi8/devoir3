@@ -1,4 +1,4 @@
-package agents
+package game
 
 type Position struct {
 	X, Y int
@@ -17,7 +17,7 @@ type GridAgent struct {
 	moveFunc          func()
 }
 
-func (a *GridAgent) Move() {
+func (a *GridAgent) Move(grid *Grid) {
 	a.moveFunc()
 }
 
