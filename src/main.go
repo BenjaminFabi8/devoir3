@@ -54,7 +54,7 @@ func (g *Grid) PrintGrid() {
 
 // IsValidMove checks if a move is valid
 func (g *Grid) IsValidMove(pos agents.Position) bool {
-	if pos.X < 0 || pos.X >= g.Rows || pos.Y < 0 || pos.Y >= g.Cols {
+	if pos.Y < 0 || pos.Y >= g.Rows || pos.X < 0 || pos.X >= g.Cols {
 		return false
 	}
 	return g.Cells[pos.Y][pos.X] == Empty || g.Cells[pos.Y][pos.X] == Objective
@@ -207,7 +207,7 @@ func main() {
 
 		newPos, err := GenerateAStarPoint(grid, agentAStarPos)
 
-		if !err {
+		if !err && !objectiveReached {
 			fmt.Print("GO sa gosse pis sa me force a l'utiliser -_- \n")
 			continue
 		}
