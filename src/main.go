@@ -18,11 +18,11 @@ type Grid struct {
 	Cells      [][]rune
 	Rows       int
 	Cols       int
-	Objectives []Position
+	Objectives []agents.Position
 }
 
-var directions = []Position{
-	{-1, 0}, {1, 0}, {0, -1}, {0, 1},
+var directions = []agents.Position{
+	{X: -1, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: -1}, {X: 0, Y: 1},
 }
 
 func InitializeGrid(input []string) *Grid {
@@ -37,10 +37,10 @@ func InitializeGrid(input []string) *Grid {
 }
 
 func (g *Grid) SetObjectives() {
-	for i := 0; i < g.Rows; i++ {
-		for j := 0; j < g.Cols; j++ {
+	for i := range g.Rows {
+		for j := range g.Cols {
 			if g.Cells[i][j] == Objective {
-				g.Objectives = append(g.Objectives, Position{j, i})
+				g.Objectives = append(g.Objectives, agents.Position{X: j, Y: i})
 			}
 		}
 	}
@@ -70,27 +70,27 @@ func (g *Grid) MoveAgent(current, next agents.Position) bool {
 	return false
 }
 
-func GetRandomMove(pos Position, rng *rand.Rand) Position {
+func GetRandomMove(pos agents.Position, rng *rand.Rand) agents.Position {
 	move := directions[rng.Intn(len(directions))]
-	return Position{X: pos.X + move.X, Y: pos.Y + move.Y}
+	return agents.Position{X: pos.X + move.X, Y: pos.Y + move.Y}
 }
 
-func GenerateAStarPoint(g *Grid, start Position) (Position, bool) {
+func GenerateAStarPoint(g *Grid, start agents.Position) (agents.Position, bool) {
 	//A faire dans le constructeur
 	bestObjective, found := g.GetClosestObjective(start)
 	if !found {
 		fmt.Println("Oups, pas d'objectif mon grand...")
-		return Position{}, false
+		return agents.Position{}, false
 	}
 	//fmt.Printf("Objectif Found: %d, %d \n", bestObjective.X, bestObjective.Y)
 
-	queue := []Position{start}
-	visited := make(map[Position]bool)
-	parent := make(map[Position]Position)
+	queue := []agents.Position{start}
+	visited := make(map[agents.Position]bool)
+	parent := make(map[agents.Position]agents.Position)
 	visited[start] = true
 
 	for len(queue) > 0 {
-		nextQueue := []Position{}
+		nextQueue := []agents.Position{}
 		for _, current := range queue {
 			if current == bestObjective {
 				step := bestObjective
@@ -101,7 +101,7 @@ func GenerateAStarPoint(g *Grid, start Position) (Position, bool) {
 			}
 
 			for _, direction := range directions {
-				newPos := Position{current.X + direction.X, current.Y + direction.Y}
+				newPos := agents.Position{X: current.X + direction.X, Y: current.Y + direction.Y}
 				if g.IsValidMove(newPos) && !visited[newPos] {
 					nextQueue = append(nextQueue, newPos)
 					visited[newPos] = true
@@ -112,16 +112,16 @@ func GenerateAStarPoint(g *Grid, start Position) (Position, bool) {
 		queue = nextQueue
 	}
 
-	return Position{}, false
+	return agents.Position{}, false
 }
 
-func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
+func (g *Grid) GetClosestObjective(start agents.Position) (agents.Position, bool) {
 
 	if len(g.Objectives) == 1 {
 		return g.Objectives[0], true
 	}
 
-	closest := Position{}
+	closest := agents.Position{}
 	minSteps := 10000
 
 	for _, obj := range g.Objectives {
@@ -133,27 +133,27 @@ func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
 	}
 
 	if minSteps == -1 {
-		return Position{}, false
+		return agents.Position{}, false
 	}
 
 	return closest, true
 }
 
-func (g *Grid) GetDistanceForObjectif(start, objective Position) int {
-	queue := []Position{start}
-	visited := make(map[Position]bool)
+func (g *Grid) GetDistanceForObjectif(start, objective agents.Position) int {
+	queue := []agents.Position{start}
+	visited := make(map[agents.Position]bool)
 	visited[start] = true
 	steps := 0
 
 	for len(queue) > 0 {
-		nextQueue := []Position{}
+		nextQueue := []agents.Position{}
 		for _, current := range queue {
 			if current == objective {
 				return steps
 			}
 
 			for _, direction := range directions {
-				newPos := Position{current.X + direction.X, current.Y + direction.Y}
+				newPos := agents.Position{X: current.X + direction.X, Y: current.Y + direction.Y}
 				if g.IsValidMove(newPos) && !visited[newPos] {
 					nextQueue = append(nextQueue, newPos)
 					visited[newPos] = true
@@ -183,8 +183,8 @@ func main() {
 
 	grid := InitializeGrid(input)
 	grid.SetObjectives()
-	agentRandomPos := Position{X: 4, Y: 4}
-	agentAStarPos := Position{X: 1, Y: 1}
+	agentRandomPos := agents.Position{X: 4, Y: 4}
+	agentAStarPos := agents.Position{X: 1, Y: 1}
 
 	// Create a new random number generator
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
