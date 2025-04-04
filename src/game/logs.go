@@ -5,6 +5,8 @@ import (
 	"sort"
 	"time"
 	"strings"
+    "path/filepath"
+	"devoir3/src/utils"
 )
 
 type LogEntry struct {
@@ -35,5 +37,13 @@ func GetMergedLogEntriesString(logs []LogEntry) string {
     }
 
     return builder.String()
+}
+
+func CreateLogEntriesFile(logs []LogEntry) {
+	/*===MERGE LOGS===*/
+	mergedLogs := GetMergedLogEntriesString(logs)
+	//fmt.Println("merged logs : \n" + mergedLogs)
+	outputFile := filepath.Join("logs", "log_"+time.Now().Format("2006-01-02_15-04-05")+".txt")
+	utils.OutputLogsToFile(mergedLogs, outputFile)
 }
 
