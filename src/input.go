@@ -8,11 +8,11 @@ import (
 
 func readInputGridFromFile(filepath string) []string {
 	file, err := os.Open(filepath)
-	defer file.Close()
-
 	if err != nil {
 		fmt.Println(err)
+		return nil
 	}
+	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 
@@ -28,4 +28,20 @@ func readInputGridFromFile(filepath string) []string {
 	}
 
 	return gameGrid
+}
+
+func outputLogsToFile(logs string, filepath string) {
+	file, err := os.Create(filepath)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	defer file.Close()
+
+	_, err = file.WriteString(logs)
+	if err != nil {
+		fmt.Println(err)
+	}
 }

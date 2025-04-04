@@ -4,6 +4,8 @@ import (
 	"devoir3/src/game"
 	"fmt"
 	"time"
+    "path/filepath"
+
 )
 
 func main() {
@@ -28,14 +30,21 @@ func main() {
 	}
 
 	grid.PrintGrid()
+	logs := make([]game.LogEntry, 0)
 
 	for _, agent := range agents {
 		fmt.Printf("Agent %d Log Entries: %d\n", agent.GetId(), len(agent.GetLogEntries()))
-		for _, entry := range agent.GetLogEntries()[:3] {
+		logs = append(logs, agent.GetLogEntries()...)
+		for _, entry := range agent.GetLogEntries() {
 			fmt.Printf("Position: (%d, %d), Timestamp: %s\n", entry.Position.X, entry.Position.Y, entry.Timestamp.Format(time.RFC3339))
 		}
 	}
 
+	/*===MERGE LOGS===*/
+	mergedLogs := game.GetMergedLogEntriesString(logs)
+	//fmt.Println("merged logs : \n" + mergedLogs)
+	outputFile := filepath.Join("logs", "log_"+time.Now().Format("2006-01-02_15-04-05")+".txt")
+	outputLogsToFile(mergedLogs, outputFile)
 	fmt.Println("Objective reached!")
 
 	// for !objectiveReached {
