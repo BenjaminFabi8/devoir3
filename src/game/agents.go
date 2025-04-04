@@ -90,14 +90,13 @@ type AStarWaitingAgent struct {
 	AStarAgent
 }
 
-func NewRandomAgent(id int, pos Position, objectivePos Position, grid *Grid) *RandomAgent {
+func NewRandomAgent(id int, pos Position, grid *Grid) *RandomAgent {
 	return &RandomAgent{
 		BaseAgent: BaseAgent{
-			Id:                id,
-			Position:          pos,
-			ObjectivePosition: objectivePos,
-			LogEntries:        []LogEntry{},
-			gameGrid:          grid,
+			Id:         id,
+			Position:   pos,
+			LogEntries: []LogEntry{},
+			gameGrid:   grid,
 		},
 	}
 }
@@ -134,26 +133,21 @@ func NewAStartWaitingAgent(id int, pos Position, grid *Grid) *AStarWaitingAgent 
 
 func (a *RandomAgent) Move() bool {
 	newPos := GetRandomMove(a.Position)
-	if a.gameGrid.Cells[newPos.Y][newPos.X].Load() == Objective {
-		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
-		a.gameGrid.MoveToObjective(a.Position, newPos)
-		return true
-	}
 
-	if a.gameGrid.MoveAgent(a.Position, newPos) {
-		a.SetPosition(newPos)
-		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
-	}
-
-	return false
+	return a.MoveSelf(newPos)
 }
 
 func (a *AStarAgent) Move() bool {
 	newPos, _ := a.GenerateAStarPoint(a.Position)
 
+	return a.MoveSelf(newPos)
+}
+
+func (a *BaseAgent) MoveSelf(newPos Position) bool {
 	if a.gameGrid.Cells[newPos.Y][newPos.X].Load() == Objective {
 		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
 		a.gameGrid.MoveToObjective(a.Position, newPos)
+		a.SetPosition(newPos)
 		return true
 	}
 

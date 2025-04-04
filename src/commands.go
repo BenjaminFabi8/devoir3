@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"devoir3/src/game"
+	"fmt"
 )
 
 func handleCommand(command string, args []string) {
@@ -27,17 +27,20 @@ func handleCommand(command string, args []string) {
 			fmt.Println("=============================================================")
 			return
 		}
-		
+
 	case "log":
 		if !objectiveReached {
 			fmt.Println("Start the program before logging.")
 			return
 		}
 		if len(args) < 1 {
-			fmt.Println("filename is required for logging")	
+			fmt.Println("filename is required for logging")
 			return
 		}
 		game.CreateLogEntriesFile(logs, args[0])
 		fmt.Println("==== LOGGING COMPLETE ====")
+
+	default:
+		fmt.Println("Command not recognized. Type \"help\" to see all available commands")
 	}
 }
