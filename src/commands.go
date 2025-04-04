@@ -13,16 +13,31 @@ func handleCommand(command string, args []string) {
 	switch command {
 	case "start":
 		if len(args) < 1 {
-			fmt.Println("Usage: start <input_file>")
+			fmt.Println("==== Starting agent program ====")
+			StartProgram()
+			return
+		}
+
+	case "help":
+		if len(args) < 1 {
+			fmt.Println("==================== LIST OF COMMANDS =======================")
+			fmt.Println("start\t\t-\tStarts the program")
+			fmt.Println("log <filename>\t-\tGenerates a log of the previous game")
+			fmt.Println("help\t\t-\tDisplays this help message")
+			fmt.Println("=============================================================")
 			return
 		}
 		
 	case "log":
-		if objectiveReached {
-			game.CreateLogEntriesFile(logs)
-			fmt.Println("Objective reached!")
+		if !objectiveReached {
+			fmt.Println("Start the program before logging.")
 			return
 		}
-
-}
+		if len(args) < 1 {
+			fmt.Println("filename is required for logging")	
+			return
+		}
+		game.CreateLogEntriesFile(logs, args[0])
+		fmt.Println("==== LOGGING COMPLETE ====")
+	}
 }

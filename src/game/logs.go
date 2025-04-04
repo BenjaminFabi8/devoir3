@@ -39,11 +39,11 @@ func GetMergedLogEntriesString(logs []LogEntry) string {
     return builder.String()
 }
 
-func CreateLogEntriesFile(logs []LogEntry) {
+func CreateLogEntriesFile(logs []LogEntry, fileName string) {
 	/*===MERGE LOGS===*/
 	mergedLogs := GetMergedLogEntriesString(logs)
 	//fmt.Println("merged logs : \n" + mergedLogs)
-	outputFile := filepath.Join("logs", "log_"+time.Now().Format("2006-01-02_15-04-05")+".txt")
+	outputFile := filepath.Join("logs", fileName+".txt")
 	utils.OutputStringToFile(mergedLogs, outputFile)
 }
 

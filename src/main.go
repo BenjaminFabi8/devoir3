@@ -4,6 +4,9 @@ import (
 	"devoir3/src/game"
 	"fmt"
 	"devoir3/src/utils"
+	"bufio"
+	"os"
+	"strings"
 )
 
 var ( objectiveReached bool = false
@@ -12,6 +15,28 @@ var ( objectiveReached bool = false
 
 
 func main() {
+
+	consoleReader := bufio.NewReader(os.Stdin)
+	for {
+		fmt.Print("> ")
+		input, _ := consoleReader.ReadString('\n')
+
+		input = strings.TrimSpace(input)
+
+		parts := strings.SplitN(input, " ", 2)
+		command := strings.TrimSpace(parts[0])
+		args := []string{}
+		if len(parts) > 1 {
+			args = strings.Fields(parts[1])
+		}
+		handleCommand(command, args)
+	}
+}
+
+func StartProgram(){
+	//initialize variables
+	objectiveReached = false
+	logs = make([]game.LogEntry, 0)
 
 	input := utils.ReadInputGridFromFile("medium.txt")
 	grid := game.NewGameGrid(input)
@@ -34,8 +59,6 @@ func main() {
 		}
 	}
 
-	// agentAStarPos := game.Position{X: 1, Y: 1}
-
 	game.StartAgents(agents)
 
 	for _, agent := range agents {
@@ -47,37 +70,8 @@ func main() {
 	for _, agent := range agents {
 		fmt.Printf("Agent %d Log Entries: %d\n", agent.GetId(), len(agent.GetLogEntries()))
 		logs = append(logs, agent.GetLogEntries()...)
-		/*for _, entry := range agent.GetLogEntries() {
-			fmt.Printf("Position: (%d, %d), Timestamp: %s\n", entry.Position.X, entry.Position.Y, entry.Timestamp.Format(time.RFC3339))
-		}*/
 	}
 
 	objectiveReached = true
 	fmt.Println("Objective reached!")
-	// for !objectiveReached {
-	// 	time.Sleep(100 * time.Millisecond)
-	// 	grid.PrintGrid()
-
-	// 	for _, agent := range agents {
-	// 		objectiveReached = agent.Move()
-	// 		if objectiveReached {
-	// 			break
-	// 		}
-	// 	}
-
-	// 	// newPos, err := grid.GenerateAStarPoint(agentAStarPos)
-
-	// 	// if !err && !objectiveReached {
-	// 	// 	fmt.Print("GO sa gosse pis sa me force a l'utiliser -_- \n")
-	// 	// 	continue
-	// 	// }
-
-	// 	// if grid.Cells[newPos.Y][newPos.X].Load() == game.Objective {
-	// 	// 	objectiveReached = true
-	// 	// }
-
-	// 	// if grid.MoveAgent(agentAStarPos, newPos) {
-	// 	// 	agentAStarPos = newPos
-	// 	// }
-	// }
 }
