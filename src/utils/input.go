@@ -30,7 +30,7 @@ func ReadInputGridFromFile(filepath string) []string {
 	return gameGrid
 }
 
-func OutputLogsToFile(logs string, filepath string) {
+func OutputStringToFile(logs string, filepath string) {
 	file, err := os.Create(filepath)
 
 	if err != nil {

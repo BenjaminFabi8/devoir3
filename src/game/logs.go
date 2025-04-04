@@ -44,6 +44,6 @@ func CreateLogEntriesFile(logs []LogEntry) {
 	mergedLogs := GetMergedLogEntriesString(logs)
 	//fmt.Println("merged logs : \n" + mergedLogs)
 	outputFile := filepath.Join("logs", "log_"+time.Now().Format("2006-01-02_15-04-05")+".txt")
-	utils.OutputLogsToFile(mergedLogs, outputFile)
+	utils.OutputStringToFile(mergedLogs, outputFile)
 }
 
