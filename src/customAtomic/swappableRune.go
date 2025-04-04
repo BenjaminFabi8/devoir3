@@ -1,23 +1,26 @@
 package customAtomic
 
-import "sync/atomic"
+import (
+	"sync/atomic"
+)
 
 type SwappableRune struct {
 	value *atomic.Int32
 }
 
-func (sa *SwappableRune) SwapAtom(other *SwappableRune, condition rune) (success bool) {
-	agentVal := sa.Load()
+const Empty = ' '
+
+func (sr *SwappableRune) SwapAtom(other *SwappableRune) (success bool) {
+	agentVal := sr.Load()
 	otherVal := other.Load()
 
-	if otherVal != condition {
+	if otherVal != Empty {
 		return false
 	}
 
-	if other.CompareAndSwap(' ', agentVal) {
-		if sa.CompareAndSwap(agentVal, otherVal) {
-			return true
-		}
+	// Attempt to swap the values atomically
+	if sr.CompareAndSwap(agentVal, otherVal) && other.CompareAndSwap(otherVal, agentVal) {
+		return true
 	}
 
 	return false

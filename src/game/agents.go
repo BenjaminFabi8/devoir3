@@ -1,6 +1,8 @@
 package game
 
 import (
+	"context"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -48,22 +50,32 @@ func (a *BaseAgent) GetId() int                     { return a.Id }
 func (a *BaseAgent) IsReached() bool                { return a.reached }
 func (a *BaseAgent) SetReached(reached bool)        { a.reached = reached }
 
-func StartAgent(a Agent, objectiveReached chan bool) chan bool {
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-done:
-				return
-			default:
-				if a.Move() {
-					a.SetReached(true)
-					objectiveReached <- true
+func StartAgents(agents []Agent) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	for _, agent := range agents {
+		go func(a Agent) {
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				default:
+					if a.Move() {
+						cancel()
+						return
+					}
 				}
 			}
-		}
-	}()
-	return done
+		}(agent)
+	}
+
+	select {
+	case <-ctx.Done():
+		fmt.Println("Objective reached!")
+		return
+	}
+
 }
 
 type RandomAgent struct {
@@ -89,6 +101,7 @@ func (a *RandomAgent) Move() bool {
 	newPos := GetRandomMove(a.Position)
 	if a.gameGrid.Cells[newPos.Y][newPos.X].Load() == Objective {
 		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
+		a.gameGrid.MoveToObjective(a.Position, newPos)
 		return true
 	}
 

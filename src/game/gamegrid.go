@@ -83,7 +83,7 @@ func (g *Grid) IsValidMove(pos Position) bool {
 // MoveAgent moves an agent to a new position if valid
 func (g *Grid) MoveAgent(current, next Position) bool {
 	if g.IsValidMove(next) {
-		g.Cells[current.Y][current.X].SwapAtom(&g.Cells[next.Y][next.X], Empty)
+		g.Cells[current.Y][current.X].SwapAtom(&g.Cells[next.Y][next.X])
 		return true
 	}
 	return false
