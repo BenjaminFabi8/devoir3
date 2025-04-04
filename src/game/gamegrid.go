@@ -17,11 +17,6 @@ var directions = []Position{
 	{X: -1, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: -1}, {X: 0, Y: 1},
 }
 
-type Test struct {
-	Symbol   rune
-	occupied bool
-}
-
 type Grid struct {
 	Cells      [][]customAtomic.SwappableRune
 	Rows       int
@@ -47,11 +42,23 @@ func NewGameGrid(input []string) *Grid {
 func (g *Grid) SetObjectives() {
 	for i := range g.Rows {
 		for j := range g.Cols {
-			if g.Cells[i][j] == customAtomic.NewSwappableRune(Objective) {
+			if g.Cells[i][j].Load() == Objective {
 				g.Objectives = append(g.Objectives, Position{X: j, Y: i})
 			}
 		}
 	}
+}
+
+func (g *Grid) GetAgentsPositions() []Position {
+	positions := []Position{}
+	for i := range g.Rows {
+		for j := range g.Cols {
+			if g.Cells[i][j].Load() == AgentChar {
+				positions = append(positions, Position{X: j, Y: i})
+			}
+		}
+	}
+	return positions
 }
 
 func (g *Grid) PrintGrid() {
@@ -80,6 +87,11 @@ func (g *Grid) MoveAgent(current, next Position) bool {
 		return true
 	}
 	return false
+}
+
+func (g *Grid) MoveToObjective(agentPos Position, objectivePos Position) {
+	g.Cells[agentPos.Y][agentPos.X].Swap(Empty)
+	g.Cells[objectivePos.Y][objectivePos.X].Swap(AgentChar)
 }
 
 func (g *Grid) GetClosestObjective(start Position) (Position, bool) {

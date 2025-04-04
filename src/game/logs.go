@@ -8,7 +8,7 @@ import (
 type LogEntry struct {
 	Id        int
 	Position  Position
-	TimeStamp time.Time
+	Timestamp time.Time
 }
 
 func (log LogEntry) GetStringPosition() string {
