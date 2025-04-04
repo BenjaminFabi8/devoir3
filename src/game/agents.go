@@ -65,6 +65,7 @@ func StartAgents(agents []Agent) {
 						cancel()
 						return
 					}
+					time.Sleep(1 * time.Millisecond) // Simulate agent movement delay
 				}
 			}
 		}(agent)
@@ -75,7 +76,6 @@ func StartAgents(agents []Agent) {
 		fmt.Println("Objective reached!")
 		return
 	}
-
 }
 
 type RandomAgent struct {
