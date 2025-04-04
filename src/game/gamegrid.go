@@ -118,46 +118,6 @@ func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
 	return closest, true
 }
 
-func (g *Grid) GenerateAStarPoint(start Position) (Position, bool) {
-	//A faire dans le constructeur
-	bestObjective, found := g.GetClosestObjective(start)
-	if !found {
-		fmt.Println("Oups, pas d'objectif mon grand...")
-		return Position{}, false
-	}
-	//fmt.Printf("Objectif Found: %d, %d \n", bestObjective.X, bestObjective.Y)
-
-	queue := []Position{start}
-	visited := make(map[Position]bool)
-	parent := make(map[Position]Position)
-	visited[start] = true
-
-	for len(queue) > 0 {
-		nextQueue := []Position{}
-		for _, current := range queue {
-			if current == bestObjective {
-				step := bestObjective
-				for parent[step] != start {
-					step = parent[step]
-				}
-				return step, true
-			}
-
-			for _, direction := range directions {
-				newPos := Position{X: current.X + direction.X, Y: current.Y + direction.Y}
-				if g.IsValidMove(newPos) && !visited[newPos] {
-					nextQueue = append(nextQueue, newPos)
-					visited[newPos] = true
-					parent[newPos] = current
-				}
-			}
-		}
-		queue = nextQueue
-	}
-
-	return Position{}, false
-}
-
 func (g *Grid) GetDistanceForObjectif(start, objective Position) int {
 	queue := []Position{start}
 	visited := make(map[Position]bool)

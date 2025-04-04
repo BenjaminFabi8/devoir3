@@ -82,6 +82,14 @@ type RandomAgent struct {
 	BaseAgent
 }
 
+type AStarAgent struct {
+	BaseAgent
+}
+
+type AStarWaitingAgent struct {
+	AStarAgent
+}
+
 func NewRandomAgent(id int, pos Position, objectivePos Position, grid *Grid) *RandomAgent {
 	return &RandomAgent{
 		BaseAgent: BaseAgent{
@@ -94,10 +102,37 @@ func NewRandomAgent(id int, pos Position, objectivePos Position, grid *Grid) *Ra
 	}
 }
 
-func (a *RandomAgent) Move() bool {
-	if a.reached {
-		return false
+func NewAStartAgent(id int, pos Position, grid *Grid) *AStarAgent {
+	bestObjective, _ := grid.GetClosestObjective(pos)
+
+	return &AStarAgent{
+		BaseAgent: BaseAgent{
+			Id:                id,
+			Position:          pos,
+			ObjectivePosition: bestObjective,
+			LogEntries:        []LogEntry{},
+			gameGrid:          grid,
+		},
 	}
+}
+
+func NewAStartWaitingAgent(id int, pos Position, grid *Grid) *AStarWaitingAgent {
+	bestObjective, _ := grid.GetClosestObjective(pos)
+
+	return &AStarWaitingAgent{
+		AStarAgent: AStarAgent{
+			BaseAgent: BaseAgent{
+				Id:                id,
+				Position:          pos,
+				ObjectivePosition: bestObjective,
+				LogEntries:        []LogEntry{},
+				gameGrid:          grid,
+			},
+		},
+	}
+}
+
+func (a *RandomAgent) Move() bool {
 	newPos := GetRandomMove(a.Position)
 	if a.gameGrid.Cells[newPos.Y][newPos.X].Load() == Objective {
 		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
@@ -111,4 +146,62 @@ func (a *RandomAgent) Move() bool {
 	}
 
 	return false
+}
+
+func (a *AStarAgent) Move() bool {
+	newPos, _ := a.GenerateAStarPoint(a.Position)
+
+	if a.gameGrid.Cells[newPos.Y][newPos.X].Load() == Objective {
+		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
+		a.gameGrid.MoveToObjective(a.Position, newPos)
+		return true
+	}
+
+	if a.gameGrid.MoveAgent(a.Position, newPos) {
+		a.SetPosition(newPos)
+		a.AddLogEntry(LogEntry{Id: a.Id, Position: newPos, Timestamp: time.Now()})
+	}
+
+	return false
+}
+
+func (a *AStarWaitingAgent) Move() bool {
+	result := a.AStarAgent.Move()
+
+	//Not sure where to put it...
+	time.Sleep(10 * time.Millisecond)
+
+	return result
+}
+
+func (aStarAgent *AStarAgent) GenerateAStarPoint(start Position) (Position, bool) {
+	queue := []Position{start}
+	visited := make(map[Position]bool)
+	parent := make(map[Position]Position)
+	visited[start] = true
+
+	for len(queue) > 0 {
+		nextQueue := []Position{}
+		for _, current := range queue {
+			if current == aStarAgent.ObjectivePosition {
+				step := aStarAgent.ObjectivePosition
+				for parent[step] != start {
+					step = parent[step]
+				}
+				return step, true
+			}
+
+			for _, direction := range directions {
+				newPos := Position{X: current.X + direction.X, Y: current.Y + direction.Y}
+				if aStarAgent.gameGrid.IsValidMove(newPos) && !visited[newPos] {
+					nextQueue = append(nextQueue, newPos)
+					visited[newPos] = true
+					parent[newPos] = current
+				}
+			}
+		}
+		queue = nextQueue
+	}
+
+	return Position{}, false
 }

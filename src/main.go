@@ -3,8 +3,8 @@ package main
 import (
 	"devoir3/src/game"
 	"fmt"
+	"path/filepath"
 	"time"
-    "path/filepath"
 )
 
 func main() {
@@ -16,8 +16,18 @@ func main() {
 	agentsPositions := grid.GetAgentsPositions()
 	agents := make([]game.Agent, len(agentsPositions))
 
-	for i, agentPos := range agentsPositions {
-		agents[i] = game.NewRandomAgent(i, agentPos, grid.Objectives[0], grid)
+	if len(agents) >= 3 {
+		for i, agentPos := range agentsPositions {
+			if i == 0 {
+				//A*
+				agents[i] = game.NewAStartAgent(i, agentPos, grid)
+			} else if i == 1 {
+				//A* wait
+				agents[i] = game.NewAStartWaitingAgent(i, agentPos, grid)
+			} else {
+				agents[i] = game.NewRandomAgent(i, agentPos, grid.Objectives[0], grid)
+			}
+		}
 	}
 
 	// agentAStarPos := game.Position{X: 1, Y: 1}
@@ -34,9 +44,9 @@ func main() {
 	for _, agent := range agents {
 		fmt.Printf("Agent %d Log Entries: %d\n", agent.GetId(), len(agent.GetLogEntries()))
 		logs = append(logs, agent.GetLogEntries()...)
-		for _, entry := range agent.GetLogEntries() {
+		/*for _, entry := range agent.GetLogEntries() {
 			fmt.Printf("Position: (%d, %d), Timestamp: %s\n", entry.Position.X, entry.Position.Y, entry.Timestamp.Format(time.RFC3339))
-		}
+		}*/
 	}
 
 	/*===MERGE LOGS===*/
