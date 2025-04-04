@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"bufio"
@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-func readInputGridFromFile(filepath string) []string {
+func ReadInputGridFromFile(filepath string) []string {
 	file, err := os.Open(filepath)
 	if err != nil {
 		fmt.Println(err)
@@ -30,7 +30,7 @@ func readInputGridFromFile(filepath string) []string {
 	return gameGrid
 }
 
-func outputLogsToFile(logs string, filepath string) {
+func OutputStringToFile(logs string, filepath string) {
 	file, err := os.Create(filepath)
 
 	if err != nil {

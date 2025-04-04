@@ -3,13 +3,17 @@ package main
 import (
 	"devoir3/src/game"
 	"fmt"
-	"path/filepath"
-	"time"
+	"devoir3/src/utils"
 )
+
+var ( objectiveReached bool = false
+	  logs []game.LogEntry = make([]game.LogEntry, 0)
+	)
+
 
 func main() {
 
-	input := readInputGridFromFile("medium.txt")
+	input := utils.ReadInputGridFromFile("medium.txt")
 	grid := game.NewGameGrid(input)
 	grid.SetObjectives()
 	fmt.Printf("Objectives: %v\n", grid.Objectives)
@@ -39,7 +43,6 @@ func main() {
 	}
 
 	grid.PrintGrid()
-	logs := make([]game.LogEntry, 0)
 
 	for _, agent := range agents {
 		fmt.Printf("Agent %d Log Entries: %d\n", agent.GetId(), len(agent.GetLogEntries()))
@@ -49,13 +52,8 @@ func main() {
 		}*/
 	}
 
-	/*===MERGE LOGS===*/
-	mergedLogs := game.GetMergedLogEntriesString(logs)
-	//fmt.Println("merged logs : \n" + mergedLogs)
-	outputFile := filepath.Join("logs", "log_"+time.Now().Format("2006-01-02_15-04-05")+".txt")
-	outputLogsToFile(mergedLogs, outputFile)
+	objectiveReached = true
 	fmt.Println("Objective reached!")
-
 	// for !objectiveReached {
 	// 	time.Sleep(100 * time.Millisecond)
 	// 	grid.PrintGrid()
