@@ -18,7 +18,6 @@ func (sr *SwappableRune) SwapAtom(other *SwappableRune) (success bool) {
 		return false
 	}
 
-	// Attempt to swap the values atomically
 	if sr.CompareAndSwap(agentVal, otherVal) && other.CompareAndSwap(otherVal, agentVal) {
 		return true
 	}

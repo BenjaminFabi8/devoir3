@@ -1,12 +1,12 @@
 package game
 
 import (
-	"fmt"
-	"sort"
-	"time"
-	"strings"
-    "path/filepath"
 	"devoir3/src/utils"
+	"fmt"
+	"path/filepath"
+	"sort"
+	"strings"
+	"time"
 )
 
 type LogEntry struct {
@@ -26,17 +26,17 @@ func GetMergedLogEntriesString(logs []LogEntry) string {
 
 	var builder strings.Builder
 
-	WelcomeMessage := 
-	"===========================\nAGENT LOGS\n===========================\nAgent | Position (X:Y)\n---------------------------\n"
-    builder.WriteString(WelcomeMessage)
+	WelcomeMessage :=
+		"===========================\nAGENT LOGS\n===========================\nAgent | Position (X:Y)\n---------------------------\n"
+	builder.WriteString(WelcomeMessage)
 	for i, log := range logs {
-        builder.WriteString(log.GetStringPosition())
-        if i < len(logs)-1 {
-            builder.WriteString("\n")
-        }
-    }
+		builder.WriteString(log.GetStringPosition())
+		if i < len(logs)-1 {
+			builder.WriteString("\n")
+		}
+	}
 
-    return builder.String()
+	return builder.String()
 }
 
 func CreateLogEntriesFile(logs []LogEntry, fileName string) {
@@ -46,4 +46,3 @@ func CreateLogEntriesFile(logs []LogEntry, fileName string) {
 	outputFile := filepath.Join("logs", fileName+".txt")
 	utils.OutputStringToFile(mergedLogs, outputFile)
 }
-

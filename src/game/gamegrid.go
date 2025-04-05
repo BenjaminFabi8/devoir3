@@ -104,7 +104,7 @@ func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
 	minSteps := 10000
 
 	for _, obj := range g.Objectives {
-		steps := g.GetDistanceForObjectif(start, obj)
+		steps := g.GetDistanceForObjective(start, obj)
 		if steps != -1 && steps < minSteps {
 			minSteps = steps
 			closest = obj
@@ -118,7 +118,7 @@ func (g *Grid) GetClosestObjective(start Position) (Position, bool) {
 	return closest, true
 }
 
-func (g *Grid) GetDistanceForObjectif(start, objective Position) int {
+func (g *Grid) GetDistanceForObjective(start, objective Position) int {
 	queue := []Position{start}
 	visited := make(map[Position]bool)
 	visited[start] = true
