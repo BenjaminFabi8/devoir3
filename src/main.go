@@ -15,6 +15,10 @@ var (
 )
 
 func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("You must provide the input file path as an argument.")
+		return
+	}
 
 	consoleReader := bufio.NewReader(os.Stdin)
 	handleCommand("help", nil)
@@ -34,11 +38,11 @@ func main() {
 	}
 }
 
-func StartProgram() {
+func StartProgram(filePath string) {
 	objectiveReached = false
 	logs = make([]game.LogEntry, 0)
 
-	input := utils.ReadInputGridFromFile("medium.txt")
+	input := utils.ReadInputGridFromFile(filePath)
 	grid := game.NewGameGrid(input)
 	grid.SetObjectives()
 	if len(grid.Objectives) == 0 {
@@ -74,7 +78,6 @@ func StartProgram() {
 	grid.PrintGrid()
 
 	for _, agent := range agents {
-		fmt.Printf("Agent %d Log Entries: %d\n", agent.GetId(), len(agent.GetLogEntries()))
 		logs = append(logs, agent.GetLogEntries()...)
 	}
 }

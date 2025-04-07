@@ -3,6 +3,7 @@ package main
 import (
 	"devoir3/src/game"
 	"fmt"
+	"os"
 )
 
 func handleCommand(command string, args []string) {
@@ -14,7 +15,8 @@ func handleCommand(command string, args []string) {
 	case "start":
 		if len(args) < 1 {
 			fmt.Println("==== Starting agent program ====")
-			StartProgram()
+			inputFilePath := os.Args[1]
+			StartProgram(inputFilePath)
 			return
 		}
 

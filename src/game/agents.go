@@ -2,7 +2,6 @@ package game
 
 import (
 	"context"
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -65,7 +64,7 @@ func StartAgents(agents []Agent) {
 						cancel()
 						return
 					}
-					time.Sleep(1 * time.Millisecond) // Simulate agent movement delay
+					time.Sleep(1 * time.Millisecond)
 				}
 			}
 		}(agent)
@@ -73,7 +72,6 @@ func StartAgents(agents []Agent) {
 
 	select {
 	case <-ctx.Done():
-		fmt.Println("Objective reached!")
 		return
 	}
 }
