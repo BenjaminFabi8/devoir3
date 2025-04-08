@@ -16,7 +16,8 @@
    cd src
 3. Exécuter la commande:
     ```sh
-   go run .
+#filename est le fichier pour la carte contenant le jeux
+   go run . <filename>
 
 
 ### Commande possible une fois le programme en cours
